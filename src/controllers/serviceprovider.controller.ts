@@ -15,7 +15,9 @@ export const createServiceProvider = async (req: Request, res: Response) => {
     servicetype,
     licensed,
     insuranced,
-    userid,
+    email,
+    passwords,
+    city
   } = req.body;
 
   try {
@@ -23,11 +25,11 @@ export const createServiceProvider = async (req: Request, res: Response) => {
       `INSERT INTO serviceprovider (
         firstname, lastname, companyname, experience,
         phonenumber, countrycode, address, state, zcode,
-        servicetype, licensed, insuranced, userid
+        servicetype, licensed, insuranced, email, passwords,city
       ) VALUES (
         $1, $2, $3, $4,
         $5, $6, $7, $8, $9,
-        $10, $11, $12, $13
+        $10, $11, $12, $13, $14, $15
       ) RETURNING *`,
       [
         firstname,
@@ -42,7 +44,9 @@ export const createServiceProvider = async (req: Request, res: Response) => {
         servicetype,
         licensed,
         insuranced,
-        userid
+        email,
+        passwords,
+        city
       ]
     );
 

@@ -14,6 +14,7 @@ export const createHomeOwner = async (req: Request, res: Response) => {
     state,
     zcode,
     servicetype,
+    city
   } = req.body;
 
   try {
@@ -31,10 +32,10 @@ export const createHomeOwner = async (req: Request, res: Response) => {
     const result = await db.query(
       `INSERT INTO homeowner (
         firstname, lastname, phonenumber, email, passwords, 
-        countrycode, country, address, state, zcode, servicetype
+        countrycode, country, address, state, zcode, servicetype, city
       ) VALUES (
         $1, $2, $3, $4, $5, 
-        $6, $7, $8, $9, $10, $11
+        $6, $7, $8, $9, $10, $11, $12
       ) RETURNING *`,
       [
         firstname,
@@ -48,6 +49,7 @@ export const createHomeOwner = async (req: Request, res: Response) => {
         state,
         zcode,
         servicetype,
+        city
       ]
     );
 
@@ -60,7 +62,6 @@ export const createHomeOwner = async (req: Request, res: Response) => {
 
 
 export const loginHomeOwner: RequestHandler = async (req: Request, res: Response) => {
-
   const { email, password } = req.body;
 
   try {
@@ -68,42 +69,43 @@ export const loginHomeOwner: RequestHandler = async (req: Request, res: Response
       `SELECT * FROM homeowner WHERE email = $1`,
       [email]
     );
+
     let user = null;
     let userType = null;
 
-     if (result.rows.length > 0) {
+    if (result.rows.length > 0) {
       user = result.rows[0];
       userType = 'homeowner';
     } else {
-      // Buscar en serviceprovider si no está en homeowner
-      result = await db.query(`SELECT * FROM serviceprovider WHERE email = $1`, [email]);
+      result = await db.query(
+        `SELECT * FROM serviceprovider WHERE email = $1`,
+        [email]
+      );
       if (result.rows.length > 0) {
         user = result.rows[0];
         userType = 'serviceprovider';
       }
     }
 
-    if (result.rows.length === 0) {
+    if (!user) {
       res.status(401).json({ message: 'Email o contraseña incorrectos' });
+    } else if (user.passwords !== password) {
+      res.status(401).json({ message: 'Email o contraseña incorrectos' });
+    } else {
+      const userId = userType === 'homeowner' ? user.user_id : user.serviceprovider_id;
+
+      res.status(200).json({
+        message: 'Login successful',
+        user: {
+          user_id: userId,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          userType,
+        },
+      });
+      console.log("user:", user);
     }
-
-
-    if (user.passwords !== password) {
-       res.status(401).json({ message: 'Email o contraseña incorrectos' });
-    }
-    const userId = userType === "homeowner" ? user.user_id : user.serviceprovider_id;
-
-    res.status(200).json({
-      message: 'Login successful',
-      
-      user: {
-        user_id: userId,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        userType
-      },
-    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
