@@ -62,4 +62,18 @@ export const listAlllHomeOwner = async (req: Request, res: Response) => {
 }
 
 
+export const updateProject= async (req: Request, res: Response) => {
+const { user_id } = req.query;
+  try {
+    const result = await db.query(
+      "update projects set update_data = true where id = $1",
+      [user_id]
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al obtener los proyectos' });
+  }
+}
+
 
