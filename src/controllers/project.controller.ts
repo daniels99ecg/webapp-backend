@@ -3,10 +3,10 @@ import db from '../db/db';
 const { v4: uuidv4 } = require("uuid");
 
 export const registerHomeOwner = async (req: Request, res: Response) => {
-     const { id, name, addToBid, startDate, endDate, cost, user_id } = req.body;
+     const { id, names, addToBid, startDate, endDate, cost, user_id } = req.body;
     const projectId = id || uuidv4();
 
-
+console.log(req.body);
   try {
    
     const query = `
@@ -17,7 +17,7 @@ export const registerHomeOwner = async (req: Request, res: Response) => {
 
     const values = [
       projectId,
-      name,
+      names,
       addToBid,
       addToBid ? startDate : null,
       addToBid ? endDate : null,

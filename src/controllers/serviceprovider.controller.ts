@@ -19,7 +19,6 @@ export const createServiceProvider = async (req: Request, res: Response) => {
     passwords,
     city
   } = req.body;
-
   try {
     const result = await db.query(
       `INSERT INTO serviceprovider (
